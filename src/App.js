@@ -21,7 +21,8 @@ import {
   Tab,
   Tabs,
   Paper,
-  Card, CardContent
+  Card,
+  CardContent,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { AccountCircle } from "@mui/icons-material";
@@ -54,7 +55,7 @@ function App() {
   };
 
   const [stockDataState, setStockDataState] = useState(null);
-  const [newsDataState, setNewsDataState] = useState(null);
+  const [newsDataState, setNewsDataState] = useState([]);
 
   const addToWatchlist = () => {
     // if (symbolInput.trim() !== "" && !watchlist.includes(symbolInput)) {
@@ -65,7 +66,7 @@ function App() {
     setSymbolInput("");
     // }
     axios.get(`/news/${symbolInput}`).then((response) => {
-      setNewsDataState(response.data);
+      setNewsDataState([...newsDataState, ...response.data]);
       console.log(response.data);
     });
   };
@@ -225,12 +226,12 @@ function App() {
           <Table aria-label="News Data">
             <TableHead>
               <TableRow>
-                <TableCell> News Title </TableCell>
-                <TableCell> News Link</TableCell>
-              
               </TableRow>
             </TableHead>
             <TableBody>
+              <Typography variant="h5" sx={{textAlign: "center"}}gutterBottom>
+                Blog Posts
+              </Typography>
               {newsDataState &&
                 newsDataState.map((news) => {
                   console.log(news);
@@ -240,18 +241,15 @@ function App() {
                     //   <TableCell>{news.link}</TableCell>
                     // </TableRow>
                     <div>
-      <Typography variant="h6" gutterBottom>
-        Blog Posts
-      </Typography>
-      {newsDataState.map((post) => (
-        <Card key={post.id} sx={{ marginBottom: 2 }}>
-          <CardContent>
-            <Typography variant="h5">{news.title}</Typography>
-            <Typography variant="body2">{news.link}</Typography>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
+                      {/* {newsDataState.map((news) => ( */}
+                      <Card key={news.id} sx={{ marginBottom: 2 }}>
+                        <CardContent>
+                          <Typography variant="h6">{news.title}</Typography>
+                          <Typography variant="body2">{news.link}</Typography>
+                        </CardContent>
+                      </Card>
+                      {/* ))} */}
+                    </div>
                   );
                 })}
             </TableBody>
@@ -260,6 +258,6 @@ function App() {
       </div>
     </div>
   );
-} 
- 
+}
+
 export default App;

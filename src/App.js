@@ -1,5 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import {
+  Table,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
   AppBar,
   Button,
   Container,
@@ -14,19 +21,19 @@ import {
   Tab,
   Tabs,
   Paper,
-} from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { AccountCircle } from '@mui/icons-material';
-import RegistrationDialog from './RegistrationDialog';
-import datatable from './datatable';
-
+  Card, CardContent
+} from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { AccountCircle } from "@mui/icons-material";
+import RegistrationDialog from "./RegistrationDialog";
+import datatable from "./datatable";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isRegistrationOpen, setIsRegistrationOpen] = useState(false);
   const [watchlist, setWatchlist] = useState([]);
-  const [username, setUsername] = useState('');
-  const [symbolInput, setSymbolInput] = useState('');
+  const [username, setUsername] = useState("");
+  const [symbolInput, setSymbolInput] = useState("");
   const [news, setNews] = useState([]);
   const [currentTab, setCurrentTab] = useState(0);
 
@@ -37,33 +44,45 @@ function App() {
   }, [isLoggedIn]);
 
   const handleLogin = () => {
-    setUsername('exampleUser');
+    setUsername("exampleUser");
     setIsLoggedIn(true);
   };
 
   const handleLogout = () => {
-    setUsername('');
+    setUsername("");
     setIsLoggedIn(false);
   };
 
+  const [stockDataState, setStockDataState] = useState(null);
+  const [newsDataState, setNewsDataState] = useState(null);
+
   const addToWatchlist = () => {
-    if (symbolInput.trim() !== '' && !watchlist.includes(symbolInput)) {
-      setWatchlist([...watchlist, symbolInput]);
-      setSymbolInput('');
-    }
+    // if (symbolInput.trim() !== "" && !watchlist.includes(symbolInput)) {
+    setWatchlist([...watchlist, symbolInput]);
+    axios.get(`/stocks/${symbolInput}`).then((response) => {
+      setStockDataState(response.data);
+    });
+    setSymbolInput("");
+    // }
+    axios.get(`/news/${symbolInput}`).then((response) => {
+      setNewsDataState(response.data);
+      console.log(response.data);
+    });
   };
 
   const removeFromWatchlist = (stockSymbol) => {
-    const updatedWatchlist = watchlist.filter((symbol) => symbol !== stockSymbol);
+    const updatedWatchlist = watchlist.filter(
+      (symbol) => symbol !== stockSymbol
+    );
     setWatchlist(updatedWatchlist);
   };
 
   const fetchNewsData = () => {
     // Replace with your actual news API endpoint
-    fetch('')
+    fetch("")
       .then((response) => response.json())
       .then((data) => setNews(data))
-      .catch((error) => console.error('Error fetching news:', error));
+      .catch((error) => console.error("Error fetching news:", error));
   };
 
   const handleTabChange = (event, newValue) => {
@@ -102,12 +121,14 @@ function App() {
               <Button color="inherit" onClick={handleRegister}>
                 Register
               </Button>
-              <RegistrationDialog isOpen={isRegistrationOpen} onClose={setIsRegistrationOpen} />
+              <RegistrationDialog
+                isOpen={isRegistrationOpen}
+                onClose={setIsRegistrationOpen}
+              />
             </>
           )}
         </Toolbar>
       </AppBar>
-
       <Container sx={{ mt: 3 }}>
         {isLoggedIn && (
           <Paper elevation={3}>
@@ -171,11 +192,74 @@ function App() {
           </Button>
         </Paper>
       </Container>
+      <div>
+        <TableContainer component={Paper}>
+          <Table aria-label="Stock Market Data">
+            <TableHead>
+              <TableRow>
+                <TableCell>Stock</TableCell>
+                <TableCell>Price</TableCell>
+                <TableCell>Market Cap</TableCell>
+                <TableCell>24hr Change</TableCell>
+                <TableCell>52 Week High</TableCell>
+                <TableCell>52 Week Low</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {stockDataState &&
+                stockDataState.map((stock) => {
+                  console.log(stock);
+                  return (
+                    <TableRow>
+                      <TableCell>{stock.symbol}</TableCell>
+                      <TableCell>{stock.regularMarketPrice}</TableCell>
+                      <TableCell>{stock.marketCap}</TableCell>
+                      <TableCell>{stock.regularMarketChange}</TableCell>
+                      <TableCell>{stock.fiftyTwoWeekHigh}</TableCell>
+                      <TableCell>{stock.fiftyTwoWeekLow}</TableCell>
+                    </TableRow>
+                  );
+                })}
+            </TableBody>
+          </Table>
+          <Table aria-label="News Data">
+            <TableHead>
+              <TableRow>
+                <TableCell> News Title </TableCell>
+                <TableCell> News Link</TableCell>
+              
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {newsDataState &&
+                newsDataState.map((news) => {
+                  console.log(news);
+                  return (
+                    // <TableRow>
+                    //   <TableCell>{news.title}</TableCell>
+                    //   <TableCell>{news.link}</TableCell>
+                    // </TableRow>
+                    <div>
+      <Typography variant="h6" gutterBottom>
+        Blog Posts
+      </Typography>
+      {newsDataState.map((post) => (
+        <Card key={post.id} sx={{ marginBottom: 2 }}>
+          <CardContent>
+            <Typography variant="h5">{news.title}</Typography>
+            <Typography variant="body2">{news.link}</Typography>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+                  );
+                })}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </div>
     </div>
   );
 }
 
-
-
 export default App;
-

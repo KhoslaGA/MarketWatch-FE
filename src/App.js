@@ -21,12 +21,12 @@ import {
   Tab,
   Tabs,
   Paper,
-} from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { AccountCircle } from '@mui/icons-material';
-import RegistrationDialog from './RegistrationDialog';
-import datatable from './datatable';
-
+  Card, CardContent
+} from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { AccountCircle } from "@mui/icons-material";
+import RegistrationDialog from "./RegistrationDialog";
+import datatable from "./datatable";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -54,6 +54,7 @@ function App() {
   };
 
   const [stockDataState, setStockDataState] = useState(null);
+  const [newsDataState, setNewsDataState] = useState(null);
 
   const addToWatchlist = () => {
     // if (symbolInput.trim() !== "" && !watchlist.includes(symbolInput)) {
@@ -63,6 +64,10 @@ function App() {
     });
     setSymbolInput("");
     // }
+    axios.get(`/news/${symbolInput}`).then((response) => {
+      setNewsDataState(response.data);
+      console.log(response.data);
+    });
   };
 
   const removeFromWatchlist = (stockSymbol) => {
@@ -188,41 +193,73 @@ function App() {
         </Paper>
       </Container>
       <div>
-      <TableContainer component={Paper}>
-            <Table aria-label="Stock Market Data">
-                <TableHead>
+        <TableContainer component={Paper}>
+          <Table aria-label="Stock Market Data">
+            <TableHead>
+              <TableRow>
+                <TableCell>Stock</TableCell>
+                <TableCell>Price</TableCell>
+                <TableCell>Market Cap</TableCell>
+                <TableCell>24hr Change</TableCell>
+                <TableCell>52 Week High</TableCell>
+                <TableCell>52 Week Low</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {stockDataState &&
+                stockDataState.map((stock) => {
+                  console.log(stock);
+                  return (
                     <TableRow>
-                        <TableCell>Stock</TableCell>
-                        <TableCell>Price</TableCell>
-                        <TableCell>Market Cap</TableCell>
-                        <TableCell>24hr Change</TableCell>
-                        <TableCell>52 Week High</TableCell>
-                        <TableCell>52 Week Low</TableCell>
+                      <TableCell>{stock.symbol}</TableCell>
+                      <TableCell>{stock.regularMarketPrice}</TableCell>
+                      <TableCell>{stock.marketCap}</TableCell>
+                      <TableCell>{stock.regularMarketChange}</TableCell>
+                      <TableCell>{stock.fiftyTwoWeekHigh}</TableCell>
+                      <TableCell>{stock.fiftyTwoWeekLow}</TableCell>
                     </TableRow>
-                </TableHead>
-                <TableBody>
-            {stockDataState &&
-              stockDataState.map((stock) => {
-                console.log(stock);
-                return (
-                  <TableRow>
-                        <TableCell>{stock.symbol}</TableCell>
-                        <TableCell>{stock.regularMarketPrice}</TableCell>
-                        <TableCell>{stock.marketCap}</TableCell>
-                        <TableCell>{stock.regularMarketChange}</TableCell>
-                        <TableCell>{stock.fiftyTwoWeekHigh}</TableCell>
-                        <TableCell>{stock.fiftyTwoWeekLow}</TableCell>
-                    </TableRow>
-                );
-              })}
-          </TableBody>
-        </Table>
+                  );
+                })}
+            </TableBody>
+          </Table>
+          <Table aria-label="News Data">
+            <TableHead>
+              <TableRow>
+                <TableCell> News Title </TableCell>
+                <TableCell> News Link</TableCell>
+              
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {newsDataState &&
+                newsDataState.map((news) => {
+                  console.log(news);
+                  return (
+                    // <TableRow>
+                    //   <TableCell>{news.title}</TableCell>
+                    //   <TableCell>{news.link}</TableCell>
+                    // </TableRow>
+                    <div>
+      <Typography variant="h6" gutterBottom>
+        Blog Posts
+      </Typography>
+      {newsDataState.map((post) => (
+        <Card key={post.id} sx={{ marginBottom: 2 }}>
+          <CardContent>
+            <Typography variant="h5">{news.title}</Typography>
+            <Typography variant="body2">{news.link}</Typography>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+                  );
+                })}
+            </TableBody>
+          </Table>
         </TableContainer>
-        </div>
-        </div>
+      </div>
+    </div>
   );
 }
-
-
 
 export default App;

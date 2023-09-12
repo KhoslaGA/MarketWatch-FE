@@ -25,7 +25,7 @@ function RegistrationDialog({ isOpen, onClose }) {
     const handleRegister = async () => {
         try {
             // Make an API request to register the user
-            const response = await fetch('your-registration-api-url', {
+            const response = await fetch('http://localhost:3000/auth/signup', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

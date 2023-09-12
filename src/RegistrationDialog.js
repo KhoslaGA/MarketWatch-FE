@@ -53,8 +53,11 @@ function RegistrationDialog({ isOpen, onClose }) {
 
 
     return (
-        <Dialog open={isOpen} onClose={onClose}>
-            <DialogTitle>Register</DialogTitle>
+
+
+
+        <Dialog open={isOpen} onClose={onClose} sx={{ maxWidth: '400px' }}>
+            <DialogTitle sx={{ backgroundColor: '#007BFF', color: 'white' }}>Register</DialogTitle>
             <DialogContent>
                 {/* Registration form content */}
                 <TextField
@@ -86,15 +89,18 @@ function RegistrationDialog({ isOpen, onClose }) {
                     onChange={handleFieldChange}
                 />
             </DialogContent>
-            <DialogActions>
-                <Button onClick={() => onClose(false)} color="primary">
+            <DialogActions sx={{ borderTop: '1px solid #e0e0e0' }}>
+                <Button onClick={() => onClose(false)} color="secondary">
                     Cancel
                 </Button>
-                <Button onClick={handleRegister} color="primary">
+                <Button onClick={handleRegister} color="primary" variant="contained">
                     Register
                 </Button>
             </DialogActions>
         </Dialog>
+
+
+
     );
 }
 

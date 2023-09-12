@@ -25,13 +25,12 @@ import {
   CardContent,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
-import logo from './Logo.jpg'
-import ExitToAppIcon from '@mui/icons-material/ExitToApp';
-
-import Footer from "./footer";
+import logo from "./Logo.jpg";
+import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import RegistrationDialog from "./RegistrationDialog";
 import EditIcon from "@mui/icons-material/Edit";
-
+import Login from "./login";
+import Footer from "./footer";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -41,6 +40,12 @@ function App() {
   const [symbolInput, setSymbolInput] = useState("");
   const [news, setNews] = useState([]);
   const [currentTab, setCurrentTab] = useState(0);
+  const [stockDataState, setStockDataState] = useState(null);
+  const [newsDataState, setNewsDataState] = useState([]);
+  const [editingSymbol, setEditingSymbol] = useState("");
+  const [editingIndex, setEditingIndex] = useState(null);
+  const [showLoginDialog, setShowLoginDialog] = useState(false);
+
 
   useEffect(() => {
     if (isLoggedIn) {
@@ -48,30 +53,36 @@ function App() {
     }
   }, [isLoggedIn]);
 
-  const handleLogin = () => {
-    setUsername("exampleUser");
-    setIsLoggedIn(true);
+  const handleLogin = (loginData) => {
+
+    // Send a POST request to your backend to verify the user's credentials
+    axios
+      .post("http://localhost:7050/auth/login", loginData)
+      .then((response) => {
+        console.log(response)
+        if (response.status === 200) {
+
+          setUsername(loginData.username);
+          setShowLoginDialog(false)
+          setIsLoggedIn(true);
+
+        } else {
+
+          console.error("Login failed");
+        }
+      })
+      .catch((error) => {
+
+        console.error("Error during login:", error);
+      });
   };
-
-  const handleLogout = () => {
-    setUsername("");
-    setIsLoggedIn(false);
-  };
-
-  const [stockDataState, setStockDataState] = useState(null);
-  const [newsDataState, setNewsDataState] = useState([]);
-
-  const [editingSymbol, setEditingSymbol] = useState("");
-  const [editingIndex, setEditingIndex] = useState(null);
 
   const addToWatchlist = () => {
-    // if (symbolInput.trim() !== "" && !watchlist.includes(symbolInput)) {
     setWatchlist([...watchlist, symbolInput]);
     axios.get(`/stocks/${symbolInput}`).then((response) => {
       setStockDataState(response.data);
     });
     setSymbolInput("");
-    // }
     axios.get(`/news/${symbolInput}`).then((response) => {
       setNewsDataState([...newsDataState, ...response.data]);
       console.log(response.data);
@@ -102,7 +113,6 @@ function App() {
     setEditingSymbol("");
   };
 
-
   const fetchNewsData = () => {
     // Replace with your actual news API endpoint
     fetch("")
@@ -119,6 +129,11 @@ function App() {
     setIsRegistrationOpen(true);
   };
 
+  const handleLogout = () => {
+    setUsername("");
+    setIsLoggedIn(false);
+  };
+
   return (
     <div className="App">
       <AppBar
@@ -127,20 +142,26 @@ function App() {
         sx={{
           backgroundColor: "#1ADB02",
           "&:hover": {
-            backgroundColor: "1ADB03", // Change the background color on hover
+            backgroundColor: "1ADB03",
           },
         }}
       >
-
         <Toolbar>
           <img
             src={logo}
             alt="Logo"
-            style={{ height: "40px", marginRight: "10px" }} // Adjust the height and margin as needed
+            style={{ height: "40px", marginRight: "10px" }}
           />
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             Stock Market Watchlist
           </Typography>
+
+          {!isLoggedIn && (<Button onClick={() => setShowLoginDialog(true)} >
+            Login
+          </Button>)}
+          <Login onClose={() => setShowLoginDialog(false)}
+            isOpen={showLoginDialog} handleLogin={handleLogin}
+          />
 
           {isLoggedIn ? (
             <>
@@ -150,8 +171,14 @@ function App() {
                 indicatorColor="primary"
                 textColor="primary"
               >
-                <Tab label="Watchlist" sx={{ fontSize: 18, fontWeight: "bold", color: "black" }} />
-                <Tab label="News" sx={{ fontSize: 18, fontWeight: "bold", color: "black" }} />
+                <Tab
+                  label="Watchlist"
+                  sx={{ fontSize: 18, fontWeight: "bold", color: "black" }}
+                />
+                <Tab
+                  label="News"
+                  sx={{ fontSize: 18, fontWeight: "bold", color: "black" }}
+                />
               </Tabs>
               <Typography variant="body1" sx={{ mr: 2 }}>
                 Welcome, {username}!
@@ -160,14 +187,25 @@ function App() {
                 Logout
               </Button>
               <IconButton color="inherit" onClick={handleLogout}>
-                <ExitToAppIcon /> {/* Replace this with the icon */}
+                <ExitToAppIcon />
               </IconButton>
             </>
+
           ) : (
             <>
-              <Button color="inherit" onClick={handleLogin}>
-                Login
-              </Button>
+              {/* <Dialog open={isOpen} onClose={onClose} sx={{ maxWidth: '400px' }}>
+                <DialogTitle sx={{ backgroundColor: '#007BFF', color: 'white' }}>Login</DialogTitle>
+
+                <DialogActions sx={{ borderTop: '1px solid #e0e0e0' }}>
+                  <Button onClick={() => onClose(false)} color="secondary">
+                    Cancel
+                  </Button>
+                  <Button onClick={handleRegister} color="primary" variant="contained">
+                    Register
+                  </Button>
+                </DialogActions>
+              </Dialog> */}
+
               <Button color="inherit" onClick={handleRegister}>
                 Register
               </Button>
@@ -196,7 +234,9 @@ function App() {
                         <>
                           <TextField
                             value={editingSymbol}
-                            onChange={(e) => setEditingSymbol(e.target.value)}
+                            onChange={(e) =>
+                              setEditingSymbol(e.target.value)
+                            }
                           />
                           <Button
                             variant="contained"
@@ -207,8 +247,6 @@ function App() {
                           >
                             Save
                           </Button>
-
-
                         </>
                       ) : (
                         // When not editing
@@ -235,7 +273,6 @@ function App() {
                     </ListItem>
                   ))}
                 </List>
-
               </div>
             )}
 
@@ -303,9 +340,8 @@ function App() {
             <TableBody>
               {stockDataState &&
                 stockDataState.map((stock) => {
-                  console.log(stock);
                   return (
-                    <TableRow>
+                    <TableRow key={stock.symbol}>
                       <TableCell>{stock.symbol}</TableCell>
                       <TableCell>{stock.regularMarketPrice}</TableCell>
                       <TableCell>{stock.marketCap}</TableCell>
@@ -324,16 +360,13 @@ function App() {
             </TableHead>
             <TableBody>
               <Typography variant="h5" sx={{ textAlign: "center" }} gutterBottom>
-                Blog Posts
+                Stock News
               </Typography>
               {newsDataState &&
                 newsDataState.map((news) => {
-                  console.log(news);
                   return (
-
-                    <div>
-
-                      <Card key={news.id} sx={{ marginBottom: 2, backgroundColor: "#f9f9f9" }}>
+                    <div key={news.id}>
+                      <Card sx={{ marginBottom: 2, backgroundColor: "#f9f9f9" }}>
                         <CardContent>
                           <Typography variant="h6" sx={{ fontWeight: "bold" }}>
                             {news.title}
@@ -343,18 +376,15 @@ function App() {
                           </Typography>
                         </CardContent>
                       </Card>
-                      {/* ))} */}
                     </div>
                   );
                 })}
             </TableBody>
           </Table>
         </TableContainer>
-
       </div>
       <Footer />
     </div>
-
   );
 }
 

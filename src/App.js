@@ -156,7 +156,9 @@ function App() {
             Stock Market Watchlist
           </Typography>
 
-          {!isLoggedIn && (<Button onClick={() => setShowLoginDialog(true)} >
+          {!isLoggedIn && (<Button onClick={() => {
+            if (!isRegistrationOpen) { setShowLoginDialog(true) }
+          }} >
             Login
           </Button>)}
           <Login onClose={() => setShowLoginDialog(false)}
@@ -193,18 +195,7 @@ function App() {
 
           ) : (
             <>
-              {/* <Dialog open={isOpen} onClose={onClose} sx={{ maxWidth: '400px' }}>
-                <DialogTitle sx={{ backgroundColor: '#007BFF', color: 'white' }}>Login</DialogTitle>
 
-                <DialogActions sx={{ borderTop: '1px solid #e0e0e0' }}>
-                  <Button onClick={() => onClose(false)} color="secondary">
-                    Cancel
-                  </Button>
-                  <Button onClick={handleRegister} color="primary" variant="contained">
-                    Register
-                  </Button>
-                </DialogActions>
-              </Dialog> */}
 
               <Button color="inherit" onClick={handleRegister}>
                 Register

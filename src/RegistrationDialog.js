@@ -5,6 +5,8 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
+import Paper from '@mui/material/Paper';
+import Draggable from 'react-draggable';
 
 function RegistrationDialog({ isOpen, onClose }) {
     const [formData, setFormData] = useState({
@@ -51,12 +53,21 @@ function RegistrationDialog({ isOpen, onClose }) {
         }
     };
 
+    function PaperComponent(props) {
+        return (
+            <Draggable
+                handle="#draggable-dialog-title"
+                cancel={'[class*="MuiDialogContent-root"]'}
+            >
+                <Paper {...props} />
+            </Draggable>
+        );
+    }
 
     return (
 
-
-
-        <Dialog open={isOpen} onClose={onClose} sx={{ maxWidth: '400px' }}>
+        <Dialog open={isOpen} onClose={onClose} PaperComponent={PaperComponent}
+        aria-labelledby="draggable-dialog-title" sx={{ maxWidth: '400px' }}>
             <DialogTitle sx={{ backgroundColor: '#007BFF', color: 'white' }}>Register</DialogTitle>
             <DialogContent>
                 {/* Registration form content */}
